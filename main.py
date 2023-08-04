@@ -71,32 +71,6 @@ def read_number_from_file():
             print("Error: The file does not contain a valid number.")
             return None
 
-    # Email configuration
-    from_email = "notificationcenterunofficial@gmail.com"
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-    smtp_username = ""
-    smtp_password = "sakecisabitch"
-
-    # Create a MIME message
-    msg = MIMEMultipart()
-    msg["From"] = from_email
-    msg["To"] = ", ".join(to_emails)
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
-
-    # Connect to the SMTP server and send the email
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_emails, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", str(e))
-
-
 # Create ChromeOptions with headless mode
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Run in headless mode
