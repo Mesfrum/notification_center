@@ -20,7 +20,7 @@ def rewrite_numbers_file(new_number):
         print("Error rewriting file:", str(e))
 
 
-def send_email(subject, body, to_emails):
+def send_email(subject, body, to_emails,new_mail_date):
     # Email configuration
     from_email = "notificationcenterunofficial@gmail.com"
     smtp_server = "smtp.gmail.com"
@@ -71,57 +71,72 @@ def read_number_from_file():
             print("Error: The file does not contain a valid number.")
             return None
 
-# Create ChromeOptions with headless mode
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run in headless mode
 
-# Create a WebDriver instance with headless mode
-driver = webdriver.Chrome(options=chrome_options)
+def main(event, context):
+    # Create ChromeOptions with headless mode
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Run in headless mode
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--single-process")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Create a WebDriver instance with headless mode
+    driver = webdriver.Chrome(options=chrome_options)
+    title = driver.title
+
+    url = "http://shahandanchor.com/placement/index.php"
+    driver.get(url)
+
+    # Fill in form fields
+    reg_id_field = driver.find_element(By.NAME, "reg_id")
+    reg_id_field.send_keys("15675")
+
+    password_field = driver.find_element(By.NAME, "password")
+    password_field.send_keys("akhilp")
+
+    # Submit the form
+    submit_button = driver.find_element(By.NAME, "login")
+    submit_button.click()
+
+    # Wait for AJAX request to complete (assuming an element updates)
+    wait = WebDriverWait(driver, 10)
+    updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    
+    print("Login succesfull... \nsending mail...")
+
+    all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
+
+    mail = all_mails.find_elements(By.XPATH, "./*")
+
+    newest_mail = mail[0].find_elements(By.TAG_NAME, "td")
+    new_mail_body = newest_mail[0]
+    new_mail_subject = (
+        new_mail_body.find_element(By.TAG_NAME, "a").find_element(By.TAG_NAME, "b").text
+    )
+    new_mail_date = newest_mail[1].text
+    number_of_mails = len(mail)
+
+    body = new_mail_subject + "\n A new mail has arrived in the sakec placement portal."
+
+    to_emails = ["pletiakhil100@gmail.com"]
+
+    # Checks for new mail
+    if read_number_from_file() < number_of_mails:
+        print("NEW MAIL DETECTED")
+        rewrite_numbers_file(number_of_mails)
+        send_email(new_mail_subject, body, to_emails,new_mail_date)
+    else:
+        print("NO NEW MAIL")
+
+    # Close the browser
+
+    driver.close()
+    driver.quit()
+
+    response = {"statusCode": 200, "body": title}
+
+    return response
 
 
-url = "http://shahandanchor.com/placement/index.php"
-driver.get(url)
-
-# Fill in form fields
-reg_id_field = driver.find_element(By.NAME, "reg_id")
-reg_id_field.send_keys("15675")
-
-password_field = driver.find_element(By.NAME, "password")
-password_field.send_keys("akhilp")
-
-# Submit the form
-submit_button = driver.find_element(By.NAME, "login")
-submit_button.click()
-
-# Wait for AJAX request to complete (assuming an element updates)
-wait = WebDriverWait(driver, 10)
-updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-
-
-all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
-
-mail = all_mails.find_elements(By.XPATH, "./*")
-
-newest_mail = mail[0].find_elements(By.TAG_NAME, "td")
-new_mail_body = newest_mail[0]
-new_mail_subject = (
-    new_mail_body.find_element(By.TAG_NAME, "a").find_element(By.TAG_NAME, "b").text
-)
-new_mail_date = newest_mail[1].text
-number_of_mails = len(mail)
-
-body = new_mail_subject + "\n A new mail has arrived in the sakec placement portal."
-
-to_emails = ["pletiakhil100@gmail.com"]
-
-
-# Checks for new mail
-if read_number_from_file() < number_of_mails:
-    print("NEW MAIL DETECTED")
-    rewrite_numbers_file(number_of_mails)
-    send_email(new_mail_subject, body, to_emails)
-else:
-    print("NO NEW MAIL")
-
-# Close the browser
-driver.quit()
+if __name__ == "__main__":
+    main(None,None)
