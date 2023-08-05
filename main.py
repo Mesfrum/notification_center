@@ -102,7 +102,7 @@ def main():
     wait = WebDriverWait(driver, 10)
     updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     
-    print("Login succesfull... \nsending mail...")
+    print("Login succesfull... \checking for new mail...")
 
     all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
 
