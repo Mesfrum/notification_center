@@ -72,7 +72,7 @@ def read_number_from_file():
             return None
 
 
-def main(event, context):
+def main():
     # Create ChromeOptions with headless mode
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run in headless mode
@@ -139,4 +139,4 @@ def main(event, context):
 
 
 if __name__ == "__main__":
-    main(None,None)
+    main()
