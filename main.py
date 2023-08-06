@@ -82,11 +82,11 @@ def main():
 
     # Create a WebDriver instance with headless mode
     driver = webdriver.Chrome(options=chrome_options)
-    title = driver.title
 
     url = "http://shahandanchor.com/placement/index.php"
     driver.get(url)
     print('Logging in...')
+    
     # Fill in form fields
     reg_id_field = driver.find_element(By.NAME, "reg_id")
     reg_id_field.send_keys("15675")
@@ -98,29 +98,38 @@ def main():
     submit_button = driver.find_element(By.NAME, "login")
     submit_button.click()
 
-    # Wait for AJAX request to complete (assuming an element updates)
+    # Wait for AJAX request to complete (i.e a element is updated using AJAX)
     wait = WebDriverWait(driver, 10)
     updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     
     print("Login successfull... \nChecking for new mail...")
 
+    # Find all element containing all mails
     all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
 
+    # list of all mails
     mail = all_mails.find_elements(By.XPATH, "./*")
 
+    # Latest mail 
     newest_mail = mail[0].find_elements(By.TAG_NAME, "td")
+    # Latest mail body
     new_mail_body = newest_mail[0]
+    
+    # Extracting subject from latest mail
     new_mail_subject = (
         new_mail_body.find_element(By.TAG_NAME, "a").find_element(By.TAG_NAME, "b").text
     )
+    # Date latest mail is receeived
     new_mail_date = newest_mail[1].text
+    
+    # Total number of mails in inbox
     number_of_mails = len(mail)
 
     body = new_mail_subject + "\n A new mail has arrived in the sakec placement portal."
 
+    #  email receipients list
     to_emails = ["pletiakhil100@gmail.com"]
 
-    # Checks for new mail
     if read_number_from_file() < number_of_mails:
         print("NEW MAIL DETECTED")
         rewrite_numbers_file(number_of_mails)
