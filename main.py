@@ -86,7 +86,7 @@ def main():
 
     url = "http://shahandanchor.com/placement/index.php"
     driver.get(url)
-    print('Signing in...')
+    print('Logging in...')
     # Fill in form fields
     reg_id_field = driver.find_element(By.NAME, "reg_id")
     reg_id_field.send_keys("15675")
@@ -126,6 +126,7 @@ def main():
         rewrite_numbers_file(number_of_mails)
         send_email(new_mail_subject, body, to_emails,new_mail_date)
     else:
+        send_email('No new Mail from sakec placement portal', 'No new mail from sakec placement portal', to_emails,'NIL')
         print("NO NEW MAIL")
 
     # Close the browser
