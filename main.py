@@ -130,13 +130,8 @@ def main():
         print("NO NEW MAIL")
 
     # Close the browser
-
     driver.close()
     driver.quit()
-
-    response = {"statusCode": 200, "body": title}
-
-    return response
 
 
 if __name__ == "__main__":
