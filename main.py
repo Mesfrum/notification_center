@@ -4,6 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import WebDriverException, TimeoutException, NoSuchElementException
+
+import urllib3 
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -165,17 +168,15 @@ def main():
         driver.quit()
         print_with_timestamp('Browser closed successfully\n\n')
 
-    except (webdriver.WebDriverException, urllib3.exceptions.NewConnectionError) as e:
-        print_with_timestamp("Error: Unable to establish an internet connection or WebDriver issue.", str(e))
-        # Handle the error further if needed, such as logging or retrying
+    except (WebDriverException, urllib3.exceptions.NewConnectionError) as e:
+        print_with_timestamp("Error: Unable to establish an internet connection or WebDriver issue.")
 
-    except (selenium.common.exceptions.TimeoutException, selenium.common.exceptions.NoSuchElementException) as e:
+    except (TimeoutException, NoSuchElementException) as e:
         print_with_timestamp("Error: Page or element not found due to internet connectivity issue.", str(e))
         # Handle the error further if needed, such as retrying or taking alternative actions
 
     except Exception as e:
         print_with_timestamp("An unexpected error occurred:", str(e))
-        # Handle the error further if needed, such as logging or taking alternative actions
 
 if __name__ == "__main__":
     main()
