@@ -169,14 +169,10 @@ def main():
         print_with_timestamp('Browser closed successfully\n\n')
 
     except (WebDriverException, urllib3.exceptions.NewConnectionError) as e:
-        print_with_timestamp("Error: Unable to establish an internet connection or WebDriver issue.")
-
-    except (TimeoutException, NoSuchElementException) as e:
-        print_with_timestamp("Error: Page or element not found due to internet connectivity issue.", str(e))
-        # Handle the error further if needed, such as retrying or taking alternative actions
+        print_with_timestamp("Error: Unable to establish an internet connection or WebDriver issue.\n\n")
 
     except Exception as e:
-        print_with_timestamp("An unexpected error occurred:", str(e))
+        print_with_timestamp("An unexpected error occurred.\n\n")
 
 if __name__ == "__main__":
     main()
