@@ -9,15 +9,22 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import datetime
+
+def print_with_timestamp(*args, sep=' ', end='\n'):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    content = sep.join(map(str, args))
+    print(f"[{timestamp}] {content}", end=end)
+    
 def read_email_address():
     file_path = 'email_list.txt'
     try:
         with open(file_path, "r") as file:
             to_emails = file.readlines()
-        print(f"subscribed people: \n{to_emails}")
+        # print_with_timestamp(f"subscribed people: \n{to_emails}")
         return to_emails;
     except Exception as e:
-        print("Error read recipient list:", str(e))
+        print_with_timestamp("Error read recipient list:", str(e))
         return None
 
 def rewrite_numbers_file(new_number):
@@ -26,9 +33,9 @@ def rewrite_numbers_file(new_number):
     try:
         with open(file_path, "w") as file:
             file.write(str(new_number))
-        print(f"File {file_path} rewritten with the number {new_number}")
+        print_with_timestamp(f"File {file_path} rewritten with the number {new_number}")
     except Exception as e:
-        print("Error rewriting file:", str(e))
+        print_with_timestamp("Error rewriting file:", str(e))
 
 
 def send_email(subject, body, to_emails,new_mail_date):
@@ -66,9 +73,9 @@ def send_email(subject, body, to_emails,new_mail_date):
         server.login(smtp_username, smtp_password)
         server.sendmail(from_email, to_emails, msg.as_string())
         server.quit()
-        print("Email sent successfully.")
+        print_with_timestamp("Emails sent successfully.")
     except Exception as e:
-        print("Error sending email:", str(e))
+        print_with_timestamp("Error sending email:", str(e))
 
 
 def read_number_from_file():
@@ -79,7 +86,7 @@ def read_number_from_file():
             number = int(content.strip())
             return number
         except ValueError:
-            print("Error: The file does not contain a valid number.")
+            print_with_timestamp("Error: The file does not contain a valid number.")
             return None
 
 
@@ -96,7 +103,7 @@ def main():
 
     url = "http://shahandanchor.com/placement/index.php"
     driver.get(url)
-    print('Logging in...')
+    print_with_timestamp('Logging in...')
     
     # Fill in form fields
     reg_id_field = driver.find_element(By.NAME, "reg_id")
@@ -113,7 +120,8 @@ def main():
     wait = WebDriverWait(driver, 10)
     updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     
-    print("Login successfull... \nChecking for new mail...")
+    print_with_timestamp("Login successfull...")
+    print_with_timestamp("Checking for new mail...")
 
     # Find all element containing all mails
     all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
@@ -140,19 +148,24 @@ def main():
 
     #  email receipients list
     to_emails = read_email_address()
+    
+    number_of_previous_mails = read_number_from_file() 
+    number_of_new_mails = number_of_mails- number_of_previous_mails
 
-    if read_number_from_file() < number_of_mails:
-        print("NEW MAIL DETECTED")
+    if number_of_previous_mails < number_of_mails:
+        print_with_timestamp("NEW MAIL DETECTED")
+        print_with_timestamp('There are',number_of_new_mails,' new mails')
         rewrite_numbers_file(number_of_mails)
         send_email(new_mail_subject, body, to_emails,new_mail_date)
     else:
         # send_email('testing', 'No new mail from sakec placement portal', to_emails,'NIL')
-        print("NO NEW MAIL")
+        print_with_timestamp("NO NEW MAIL")
 
     # Close the browser
+    print_with_timestamp('Closing browser...')
     driver.close()
     driver.quit()
-
+    print_with_timestamp('Browser closed successfully')
 
 if __name__ == "__main__":
     main()
