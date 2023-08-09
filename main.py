@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -10,6 +9,16 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+def read_email_address():
+    file_path = 'email_list.txt'
+    try:
+        with open(file_path, "r") as file:
+            to_emails = file.readlines()
+        print(f"subscribed people: \n{to_emails}")
+        return to_emails;
+    except Exception as e:
+        print("Error read recipient list:", str(e))
+        return None
 
 def rewrite_numbers_file(new_number):
     file_path = "mail_info.txt"
@@ -130,14 +139,14 @@ def main():
     body = new_mail_subject + "\n A new mail has arrived in the sakec placement portal."
 
     #  email receipients list
-    to_emails = ["pletiakhil100@gmail.com"]
+    to_emails = read_email_address()
 
     if read_number_from_file() < number_of_mails:
         print("NEW MAIL DETECTED")
         rewrite_numbers_file(number_of_mails)
         send_email(new_mail_subject, body, to_emails,new_mail_date)
     else:
-        send_email('No new Mail from sakec placement portal', 'No new mail from sakec placement portal', to_emails,'NIL')
+        # send_email('testing', 'No new mail from sakec placement portal', to_emails,'NIL')
         print("NO NEW MAIL")
 
     # Close the browser
