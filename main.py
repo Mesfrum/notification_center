@@ -165,7 +165,7 @@ def main():
     print_with_timestamp('Closing browser...')
     driver.close()
     driver.quit()
-    print_with_timestamp('Browser closed successfully')
+    print_with_timestamp('Browser closed successfully\n\n')
 
 if __name__ == "__main__":
     main()
