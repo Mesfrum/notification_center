@@ -37,7 +37,6 @@ def rewrite_numbers_file(new_number):
     except Exception as e:
         print_with_timestamp("Error rewriting file:", str(e))
 
-
 def send_email(subject, body, to_emails,new_mail_date):
     # Email configuration
     from_email = "notificationcenterunofficial@gmail.com"
@@ -77,7 +76,6 @@ def send_email(subject, body, to_emails,new_mail_date):
     except Exception as e:
         print_with_timestamp("Error sending email:", str(e))
 
-
 def read_number_from_file():
     file_path = "mail_info.txt"
     with open(file_path, "r") as file:
@@ -91,81 +89,93 @@ def read_number_from_file():
 
 
 def main():
-    # Create ChromeOptions with headless mode
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run in headless mode
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--single-process")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Create a WebDriver instance with headless mode
-    driver = webdriver.Chrome(options=chrome_options)
-
-    url = "http://shahandanchor.com/placement/index.php"
-    driver.get(url)
-    print_with_timestamp('Logging in...')
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Run in headless mode
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--single-process")
+        chrome_options.add_argument("--disable-dev-shm-usage")
     
-    # Fill in form fields
-    reg_id_field = driver.find_element(By.NAME, "reg_id")
-    reg_id_field.send_keys("15675")
-
-    password_field = driver.find_element(By.NAME, "password")
-    password_field.send_keys("akhilp")
-
-    # Submit the form
-    submit_button = driver.find_element(By.NAME, "login")
-    submit_button.click()
-
-    # Wait for AJAX request to complete (i.e a element is updated using AJAX)
-    wait = WebDriverWait(driver, 10)
-    updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        # Create a WebDriver instance with headless mode
+        driver = webdriver.Chrome(options=chrome_options)
     
-    print_with_timestamp("Login successfull...")
-    print_with_timestamp("Checking for new mail...")
-
-    # Find all element containing all mails
-    all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
-
-    # list of all mails
-    mail = all_mails.find_elements(By.XPATH, "./*")
-
-    # Latest mail 
-    newest_mail = mail[0].find_elements(By.TAG_NAME, "td")
-    # Latest mail body
-    new_mail_body = newest_mail[0]
+        url = "http://shahandanchor.com/placement/index.php"
+        driver.get(url)
+        print_with_timestamp('Logging in...')
+        
+        # Fill in form fields
+        reg_id_field = driver.find_element(By.NAME, "reg_id")
+        reg_id_field.send_keys("15675")
     
-    # Extracting subject from latest mail
-    new_mail_subject = (
-        new_mail_body.find_element(By.TAG_NAME, "a").find_element(By.TAG_NAME, "b").text
-    )
-    # Date latest mail is receeived
-    new_mail_date = newest_mail[1].text
+        password_field = driver.find_element(By.NAME, "password")
+        password_field.send_keys("akhilp")
     
-    # Total number of mails in inbox
-    number_of_mails = len(mail)
-
-    body = new_mail_subject + "\n A new mail has arrived in the sakec placement portal."
-
-    #  email receipients list
-    to_emails = read_email_address()
+        # Submit the form
+        submit_button = driver.find_element(By.NAME, "login")
+        submit_button.click()
     
-    number_of_previous_mails = read_number_from_file() 
-    number_of_new_mails = number_of_mails- number_of_previous_mails
+        # Wait for AJAX request to complete (i.e a element is updated using AJAX)
+        wait = WebDriverWait(driver, 10)
+        updated_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        
+        print_with_timestamp("Login successfull...")
+        print_with_timestamp("Checking for new mail...")
+    
+        # Find all element containing all mails
+        all_mails = updated_element.find_element(By.TAG_NAME, "tbody")
+    
+        # list of all mails
+        mail = all_mails.find_elements(By.XPATH, "./*")
+    
+        # Latest mail 
+        newest_mail = mail[0].find_elements(By.TAG_NAME, "td")
+        # Latest mail body
+        new_mail_body = newest_mail[0]
+        
+        # Extracting subject from latest mail
+        new_mail_subject = (
+            new_mail_body.find_element(By.TAG_NAME, "a").find_element(By.TAG_NAME, "b").text
+        )
+        # Date latest mail is receeived
+        new_mail_date = newest_mail[1].text
+        
+        # Total number of mails in inbox
+        number_of_mails = len(mail)
+    
+        body = new_mail_subject + "\n A new mail has arrived in the sakec placement portal."
+    
+        #  email receipients list
+        to_emails = read_email_address()
+        
+        number_of_previous_mails = read_number_from_file() 
+        number_of_new_mails = number_of_mails- number_of_previous_mails
+    
+        if number_of_previous_mails < number_of_mails:
+            print_with_timestamp("NEW MAIL DETECTED")
+            print_with_timestamp('There are',number_of_new_mails,' new mails')
+            rewrite_numbers_file(number_of_mails)
+            send_email(new_mail_subject, body, to_emails,new_mail_date)
+        else:
+            # send_email('testing', 'No new mail from sakec placement portal', to_emails,'NIL')
+            print_with_timestamp("NO NEW MAIL")
+    
+        # Close the browser
+        print_with_timestamp('Closing browser...')
+        driver.close()
+        driver.quit()
+        print_with_timestamp('Browser closed successfully\n\n')
 
-    if number_of_previous_mails < number_of_mails:
-        print_with_timestamp("NEW MAIL DETECTED")
-        print_with_timestamp('There are',number_of_new_mails,' new mails')
-        rewrite_numbers_file(number_of_mails)
-        send_email(new_mail_subject, body, to_emails,new_mail_date)
-    else:
-        # send_email('testing', 'No new mail from sakec placement portal', to_emails,'NIL')
-        print_with_timestamp("NO NEW MAIL")
+    except (webdriver.WebDriverException, urllib3.exceptions.NewConnectionError) as e:
+        print_with_timestamp("Error: Unable to establish an internet connection or WebDriver issue.", str(e))
+        # Handle the error further if needed, such as logging or retrying
 
-    # Close the browser
-    print_with_timestamp('Closing browser...')
-    driver.close()
-    driver.quit()
-    print_with_timestamp('Browser closed successfully\n\n')
+    except (selenium.common.exceptions.TimeoutException, selenium.common.exceptions.NoSuchElementException) as e:
+        print_with_timestamp("Error: Page or element not found due to internet connectivity issue.", str(e))
+        # Handle the error further if needed, such as retrying or taking alternative actions
+
+    except Exception as e:
+        print_with_timestamp("An unexpected error occurred:", str(e))
+        # Handle the error further if needed, such as logging or taking alternative actions
 
 if __name__ == "__main__":
     main()
